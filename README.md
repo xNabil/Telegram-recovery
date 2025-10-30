@@ -1,20 +1,18 @@
 # 📱 Telegram OTP Recovery Bot
 
-A Python tool built with **Pyrogram** to automatically process and recover Telegram session files, detect OTP messages from **@Telegram (777000)**, and log recovered phone numbers.
+This is a Python-based tool designed to help recover Telegram sessions by automating the process of receiving and handling One-Time Passwords (OTPs). It attempts to log into existing `.session` files, displays the account's phone number, captures the OTP sent to that number, and organizes sessions into 'recovered' or 'dead' folders based on the outcome.
 
 ---
 
 ## ⚙️ Features
 
-- Auto-detects and processes all `.session` files in the `sessions/` folder  
-- Handles 2FA-locked accounts (optional skip)  
-- Logs recovered phone numbers to `recovered_numbers.txt`  
-- Moves processed sessions into:
-  - `recovered_sessions/` → Successfully recovered  
-  - `dead_sessions/` → Failed or banned  
-- Colored console output with timestamps  
-- Manual OTP confirmation and control
-
+* **Session Processing**: Iterates through all `.session` files located in the `sessions` directory.
+* **Phone Number Display**: Automatically retrieves and **displays the phone number** associated with the session, so you know exactly where to send the login code.
+* **OTP Handling**: Automatically listens for and extracts the 5 or 6-digit login code from Telegram's official service account (ID 777000).
+* **2FA Check**: Can optionally skip sessions that have Two-Factor Authentication (2FA) enabled (configurable in `config.json`).
+* **Session Organization**: Automatically moves sessions to `recovered_sessions` upon success or `dead_sessions` upon failure (e.g., 2FA enabled, banned account, invalid session).
+* **Phone Number Logging**: Saves the phone numbers of all successfully recovered accounts to `recovered_numbers.txt`.
+* **Interactive Controls**: Allows you to manually retry (R), mark as failed (F), or proceed to the next session (Enter) after an OTP is received.
 ---
 
 ## 🧩 Requirements
@@ -54,32 +52,45 @@ colorama
 
 ## 🔧 Setup
 
-1. **Create `config.json`** in the same directory as `main.py`:
+1.  **Get API Credentials:**
+    * Log in to your Telegram account at [https://my.telegram.org](https://my.telegram.org).
+    * Go to "API development tools" and create a new application.
+    * You will receive an **`api_id`** and **`api_hash`**.
 
-```config.json
-{
-  "api_id": "YOUR_API_ID",
-  "api_hash": "YOUR_API_HASH",
-  "SKIP_2FA_enabled": true
-}
-```
+2.  **Configure the Bot:**
+    * Open the `config.json` file.
+    * Paste your `api_id` and `api_hash` into the respective fields.
+    * Set `SKIP_2FA_enabled` to `true` if you want to automatically skip accounts that have 2FA enabled. Otherwise, leave it as `false`.
 
-2. **Place your `.session` files** inside the `sessions/` folder.
+    **Example `config.json`:**
+    ```json
+    {
+      "api_id": 1234567,
+      "api_hash": "0123456789abcdef0123456789abcdef",
+      "SKIP_2FA_enabled": false
+    }
+    ```
 
-3. **Run the script:**
+3.  **Add Session Files:**
+    * Place all your Telegram `.session` files (e.g., `my_account.session`) into the `sessions/` directory. The script creates this directory if it doesn't exist.
 
-   ```bash
-   python main.py
-   ```
+4.  **Run the Script:**
+    * Execute the main script from your terminal:
+    ```sh
+    python main.py
+    ```
+5. The bot will:
 
-4. The bot will:
+  * The bot will start processing each session file one by one.
+    * It will log in and **display the phone number** for the account (e.g., `📱 Phone Number: +1234567890`).
+    * The script will then pause and ask you to **send an OTP to that number** (e.g., by logging in on another device) and press Enter to continue.
 
-   * Connect each session.
-   * Prompt you to send OTP to the number.
-   * Wait for the OTP from @Telegram (777000).
-   * Ask what to do next (Retry / Fail / Next).
-
----
+6.  **Handle the OTP:**
+    * Once you've sent the code, the bot will detect the incoming OTP message from Telegram (ID 777000) and display the code.
+    * You will then be prompted to:
+    * Press **Enter** to confirm recovery (saves the number, moves the session) and move to the next session.
+    * Type **`r`** and press Enter to retry waiting for an OTP for the *same* session.
+    * Type **`f`** and press Enter to mark the session as failed and move it to `dead_sessions`.
 
 ## 🗂️ Output Explanation
 
